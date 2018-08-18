@@ -256,7 +256,7 @@ public class EditUserActivity extends AppCompatActivity {
 
     private void pilihfile(){
         Intent intent=new Intent();
-        intent.setType("image/");
+        intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent,"Pilih Gambar"),1);
     }
@@ -268,7 +268,7 @@ public class EditUserActivity extends AppCompatActivity {
             Uri filePath= data.getData();
             try {
                 bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                profilImage.setImageBitmap(bitmap);
+                //profilImage.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -277,8 +277,10 @@ public class EditUserActivity extends AppCompatActivity {
     }
 
     private String getStringgambar(Bitmap bitmap) {
+
         ByteArrayOutputStream byteArrayOutputStream= new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+
         byte[] imBytesArray=byteArrayOutputStream.toByteArray();
         String encodeImage= Base64.encodeToString(imBytesArray,Base64.DEFAULT);
         return encodeImage;
@@ -287,7 +289,8 @@ public class EditUserActivity extends AppCompatActivity {
     private void uploadgambar(final String id,final String photo) {
         final ProgressDialog progressDialog =new ProgressDialog(this);
         progressDialog.setMessage("Uploading...");
-
+        progressDialog.setCancelable(false);
+        progressDialog.show();
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL_UPLOAD,
                 new Response.Listener<String>() {
                     @Override
@@ -299,6 +302,8 @@ public class EditUserActivity extends AppCompatActivity {
 
                             if (sukses.equals("1")){
                                 Toast.makeText(EditUserActivity.this,"Upload Berhasil",Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(EditUserActivity.this,"Upload Gagal",Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
                             progressDialog.dismiss();
