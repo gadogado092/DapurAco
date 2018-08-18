@@ -30,7 +30,7 @@
             android:name=".LoginActivity"
             android:theme="@style/AppThemeLogin" />
         <activity
-            android:noHistory = "true"
+            android:noHistory = "false"
             android:name=".EditUserActivity"></activity>
     </application>
 
