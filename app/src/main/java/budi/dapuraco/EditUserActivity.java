@@ -3,8 +3,12 @@ package budi.dapuraco;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,26 +31,35 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class EditUserActivity extends AppCompatActivity {
-    private Button btnlogout;
+    private Button btnlogout,btnphoto;
     private Context context;
     private SessionManager sessionManager;
     String getId;
     private EditText nama,email;
     private static String URL_READ=konfigurasi.URL+"dapuraco/read_detail.php";
     private static String URL_EDIT=konfigurasi.URL+"dapuraco/edit_detail.php";
+    private static String URL_UPLOAD=konfigurasi.URL+"dapuraco/uploadprofil.php";
     private Menu action;
+    private Bitmap bitmap;
+    CircleImageView profilImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context=getApplicationContext();
         setContentView(R.layout.activity_edit_user);
+        btnphoto= (Button)findViewById(R.id.btnphoto);
         btnlogout = (Button)findViewById(R.id.btnlogout);
         nama = (EditText) findViewById(R.id.nama);
         email = (EditText) findViewById(R.id.email);
+        profilImage= findViewById(R.id.profile_image);
         btnlogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,6 +78,13 @@ public class EditUserActivity extends AppCompatActivity {
         sessionManager.checklogin();
         HashMap<String,String> user=sessionManager.getUserDetail();
         getId=user.get(sessionManager.ID);
+
+        btnphoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pilihfile();
+            }
+        });
     }
 
     @Override
@@ -231,6 +251,78 @@ public class EditUserActivity extends AppCompatActivity {
         };
 
         RequestQueue requestQueue=Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+    }
+
+    private void pilihfile(){
+        Intent intent=new Intent();
+        intent.setType("image/");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent,"Pilih Gambar"),1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==1 && resultCode==RESULT_OK && data!=null &&data.getData()!=null){
+            Uri filePath= data.getData();
+            try {
+                bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                profilImage.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            uploadgambar(getId,getStringgambar(bitmap));
+        }
+    }
+
+    private String getStringgambar(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream= new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+        byte[] imBytesArray=byteArrayOutputStream.toByteArray();
+        String encodeImage= Base64.encodeToString(imBytesArray,Base64.DEFAULT);
+        return encodeImage;
+    }
+
+    private void uploadgambar(final String id,final String photo) {
+        final ProgressDialog progressDialog =new ProgressDialog(this);
+        progressDialog.setMessage("Uploading...");
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL_UPLOAD,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        progressDialog.dismiss();
+                        try {
+                            JSONObject jsonObject=new JSONObject(response);
+                            String sukses=jsonObject.getString("sukses");
+
+                            if (sukses.equals("1")){
+                                Toast.makeText(EditUserActivity.this,"Upload Berhasil",Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            progressDialog.dismiss();
+                            e.printStackTrace();
+                            Toast.makeText(EditUserActivity.this,"Coba Lagi! "+e,Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(EditUserActivity.this,"Coba Lagi! "+error,Toast.LENGTH_SHORT).show();
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params=new HashMap<>();
+                params.put("id",id);
+                params.put("photo",photo);
+                return params;
+            }
+        };
+        RequestQueue requestQueue= Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
     }
 }
