@@ -20,12 +20,17 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +48,7 @@ public class EditUserActivity extends AppCompatActivity {
     private Context context;
     private SessionManager sessionManager;
     String getId;
-    private EditText nama,email;
+    private EditText nama,email,nohp;
     private static String URL_READ=konfigurasi.URL+"dapuraco/read_detail.php";
     private static String URL_EDIT=konfigurasi.URL+"dapuraco/edit_detail.php";
     private static String URL_UPLOAD=konfigurasi.URL+"dapuraco/uploadprofil.php";
@@ -59,6 +64,7 @@ public class EditUserActivity extends AppCompatActivity {
         btnlogout = (Button)findViewById(R.id.btnlogout);
         nama = (EditText) findViewById(R.id.nama);
         email = (EditText) findViewById(R.id.email);
+        nohp = (EditText) findViewById(R.id.nohp);
         profilImage= findViewById(R.id.profile_image);
         btnlogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +78,13 @@ public class EditUserActivity extends AppCompatActivity {
 
             }
         });
-
+        getUserDetail();
+        nama.setFocusableInTouchMode(false);
+        email.setFocusableInTouchMode(false);
+        nohp.setFocusableInTouchMode(false);
+        nama.setFocusable(false);
+        email.setFocusable(false);
+        nohp.setFocusable(false);
         //session login
         sessionManager=new SessionManager(this);
         sessionManager.checklogin();
@@ -124,6 +136,16 @@ public class EditUserActivity extends AppCompatActivity {
 
                             nama.setText(stringnama);
                             email.setText(stringemail);
+                            nohp.setText(object.getString("nohp").trim());
+                            if (!object.getString("photo").trim().isEmpty()){
+                                Glide.with(context)
+                                        .load(konfigurasi.URL_IMAGEPROFILE+""+object.getString("photo"))
+                                        //.override(300, 300)
+                                        //.override()
+                                        //.crossFade()
+                                        .into(profilImage);
+                            }
+
                         }
 
                     }
@@ -145,7 +167,7 @@ public class EditUserActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String,String> params= new HashMap<>();
-                params.put("id","1");
+                params.put("id",getId);
                 return params;
             }
         };
@@ -156,11 +178,7 @@ public class EditUserActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getUserDetail();
-        nama.setFocusableInTouchMode(false);
-        email.setFocusableInTouchMode(false);
-        nama.setFocusable(false);
-        email.setFocusable(false);
+
     }
 
     @Override
@@ -179,7 +197,7 @@ public class EditUserActivity extends AppCompatActivity {
             btnlogout.setVisibility(View.GONE);
             nama.setFocusableInTouchMode(true);
             email.setFocusableInTouchMode(true);
-
+            nohp.setFocusableInTouchMode(true);
             InputMethodManager imm= (InputMethodManager) getSystemService(context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(nama, InputMethodManager.SHOW_IMPLICIT);
 
@@ -195,8 +213,10 @@ public class EditUserActivity extends AppCompatActivity {
 
                 nama.setFocusableInTouchMode(false);
                 email.setFocusableInTouchMode(false);
+                nohp.setFocusableInTouchMode(false);
                 nama.setFocusable(false);
                 email.setFocusable(false);
+                nohp.setFocusable(false);
                 return true;
 
                 default:
@@ -213,6 +233,7 @@ public class EditUserActivity extends AppCompatActivity {
         final String id=getId;
         final String nama=this.nama.getText().toString().trim();
         final String email=this.email.getText().toString().trim();
+        final String nohp=this.nohp.getText().toString().trim();
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL_EDIT,
                 new Response.Listener<String>() {
@@ -246,6 +267,7 @@ public class EditUserActivity extends AppCompatActivity {
                 params.put("id",id);
                 params.put("nama",nama);
                 params.put("email",email);
+                params.put("nohp",nohp);
                 return params;
             }
         };
@@ -268,10 +290,11 @@ public class EditUserActivity extends AppCompatActivity {
             Uri filePath= data.getData();
             try {
                 bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                //profilImage.setImageBitmap(bitmap);
+                profilImage.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            //System.out.println("TEST"+getStringgambar(bitmap).length());
             uploadgambar(getId,getStringgambar(bitmap));
         }
     }
@@ -279,18 +302,28 @@ public class EditUserActivity extends AppCompatActivity {
     private String getStringgambar(Bitmap bitmap) {
 
         ByteArrayOutputStream byteArrayOutputStream= new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,80,byteArrayOutputStream);
 
         byte[] imBytesArray=byteArrayOutputStream.toByteArray();
         String encodeImage= Base64.encodeToString(imBytesArray,Base64.DEFAULT);
         return encodeImage;
     }
+    public byte[] getFileDataFromDrawable(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
+    }
+
 
     private void uploadgambar(final String id,final String photo) {
         final ProgressDialog progressDialog =new ProgressDialog(this);
         progressDialog.setMessage("Uploading...");
         progressDialog.setCancelable(false);
         progressDialog.show();
+
+
+
+
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL_UPLOAD,
                 new Response.Listener<String>() {
                     @Override
@@ -329,5 +362,47 @@ public class EditUserActivity extends AppCompatActivity {
         };
         RequestQueue requestQueue= Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
+
+        /*RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, URL_UPLOAD, null, new
+                Response.Listener<JSONObject>() {
+                    public void onResponse(JSONObject response) {
+                        progressDialog.dismiss();
+                        try {
+                            JSONObject jsonObject=new JSONObject(String.valueOf(response));
+                            String sukses=jsonObject.getString("sukses");
+
+                            if (sukses.equals("1")){
+                                Toast.makeText(EditUserActivity.this,"Upload Berhasil",Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(EditUserActivity.this,"Upload Gagal",Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            progressDialog.dismiss();
+                            e.printStackTrace();
+                            Toast.makeText(EditUserActivity.this,"Coba Lagi! "+e,Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, new Response.ErrorListener(){
+                    public void onErrorResponse(VolleyError arg0) {
+                        progressDialog.dismiss();
+                        Toast.makeText(EditUserActivity.this,"Coba Lagi! "+arg0,Toast.LENGTH_SHORT).show();
+                    }
+                })
+                {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String,String> params=new HashMap<>();
+                        params.put("id",id);
+                        params.put("photo",photo);
+                        return params;
+                    }
+                };
+
+
+        int socketTimeout = 30000;//30 seconds - change to what you want
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
+        mRequestQueue.add(request);*/
     }
 }

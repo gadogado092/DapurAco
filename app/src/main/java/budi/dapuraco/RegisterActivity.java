@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText nama,email,password,c_password;
+    private EditText nama,email,password,c_password,nohp;
     private Button btn_regist;
     private ProgressBar loading;
     //private static String URL_REGIST="";
@@ -39,13 +39,23 @@ public class RegisterActivity extends AppCompatActivity {
         loading=findViewById(R.id.loading);
         nama=findViewById(R.id.name);
         email=findViewById(R.id.email);
+        nohp=findViewById(R.id.nohp);
         password=findViewById(R.id.password);
         c_password=findViewById(R.id.c_password);
         btn_regist=findViewById(R.id.btnreg);
         btn_regist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Regist();
+                if (!nama.getText().toString().trim().isEmpty()&&!nohp.getText().toString().trim().isEmpty()&&!c_password.getText().toString().trim().isEmpty()&&!email.getText().toString().trim().isEmpty()&& !password.getText().toString().trim().isEmpty() ){
+                    Regist();
+                }else {
+                    nama.setError("Diperlukan");
+                    email.setError("Diperlukan");
+                    password.setError("Diperlukan");
+                    c_password.setError("Diperlukan");
+                    nohp.setError("Diperlukan");
+                }
+
             }
         });
 
@@ -59,6 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
         final String email= this.email.getText().toString().trim();
         final String password= this.password.getText().toString().trim();
         final String cpassword= this.c_password.getText().toString().trim();
+        final String nohp= this.nohp.getText().toString().trim();
         if (password.equals(cpassword)){
             StringRequest stringRequest = new StringRequest(Request.Method.POST, konfigurasi.URL_REGIS,
                     new Response.Listener<String>() {
@@ -97,6 +108,7 @@ public class RegisterActivity extends AppCompatActivity {
                     params.put("nama", nama);
                     params.put("email", email);
                     params.put("password", password);
+                    params.put("nohp", nohp);
                     return params;
                 }
             };

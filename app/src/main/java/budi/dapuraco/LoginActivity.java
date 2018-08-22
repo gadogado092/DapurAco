@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String mEmail=email.getText().toString().trim();
                 String mPassword=password.getText().toString().trim();
-                if (!mEmail.isEmpty()|| !mPassword.isEmpty() ){
+                if (!mEmail.isEmpty()&& !mPassword.isEmpty() ){
                     Login(mEmail,mPassword);
                 }else {
                     email.setError("Diperlukan");

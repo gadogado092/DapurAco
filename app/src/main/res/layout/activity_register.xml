@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingLeft="30dp"
     android:paddingRight="30dp"
-    android:paddingTop="80dp"
+    android:paddingTop="20dp"
     android:orientation="vertical"
     tools:context=".RegisterActivity">
 
@@ -43,6 +43,21 @@
         app:passwordToggleEnabled="true"
         >
         <EditText
+            android:id="@+id/nohp"
+            android:hint="No Handphone"
+            android:inputType="phone"
+            android:textColor="@color/colortext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:passwordToggleEnabled="true"
+        >
+        <EditText
             android:id="@+id/password"
             android:hint="Password"
             android:inputType="textPassword"
@@ -69,6 +84,13 @@
 
     </android.support.design.widget.TextInputLayout>
 
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:passwordToggleEnabled="true"
+        >
+
+    </android.support.design.widget.TextInputLayout>
     <ProgressBar
         android:id="@+id/loading"
         android:layout_width="match_parent"

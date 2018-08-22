@@ -5,12 +5,14 @@ public class konfigurasi {
     //Pada tutorial Kali ini, karena kita membuat localhost maka alamatnya tertuju ke IP komputer
     //dimana File PHP tersebut berada
     //PENTING! JANGAN LUPA GANTI IP SESUAI DENGAN IP KOMPUTER DIMANA DATA PHP BERADA
-    public static final String URL="https://dapuraco.000webhostapp.com/";
+    public static final String URL="http://192.168.1.70/";
+    //public static final String URL="http://192.168.1.70/";
     public static final String URL_ADD=URL+"Android/pegawai/tambahPgw.php";
     public static final String URL_GET_ALL = URL+"dapuraco/tampilsemuamakanan.php";
     public static final String URL_REGIS = URL+"dapuraco/register.php";
     public static final String URL_LOGIN = URL+"dapuraco/login.php";
     public static final String URL_IMAGE = URL+"dapuraco/gambarmakan/";
+    public static final String URL_IMAGEPROFILE = URL+"dapuraco/profile_image/";
     public static final String URL_GET_EMP = URL+"Android/pegawai/tampilPgw.php?id=";
     public static final String URL_UPDATE_EMP = URL+"Android/pegawai/updatePgw.php";
     public static final String URL_DELETE_EMP = URL+"Android/pegawai/hapusPgw.php?id=";
