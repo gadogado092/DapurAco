@@ -7,4 +7,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Registrasi</string>
     <string name="action_settings2">Login</string>
+    <string name="facebook_app_id">2117680701824670</string>
+    <string name="fb_login_protocol_scheme">fb2117680701824670</string>
+
 </resources>

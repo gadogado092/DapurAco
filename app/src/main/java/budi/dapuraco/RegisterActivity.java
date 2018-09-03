@@ -17,6 +17,17 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +39,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText nama,email,password,c_password,nohp;
     private Button btn_regist;
     private ProgressBar loading;
+
     //private static String URL_REGIST="";
 
 
@@ -35,6 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
 
         loading=findViewById(R.id.loading);
         nama=findViewById(R.id.name);
@@ -59,7 +72,12 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+
+
+
+
     }
+
 
     private void Regist(){
         loading.setVisibility(View.VISIBLE);
