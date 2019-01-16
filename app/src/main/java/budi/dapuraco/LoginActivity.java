@@ -1,6 +1,7 @@
 package budi.dapuraco;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -27,6 +28,16 @@ import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,10 +53,19 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar loading;
     SessionManager sessionManager;
     CallbackManager callbackManager;
+
+    private FirebaseAuth mAuth;
+    private StorageReference mStorageRef;
+    private FirebaseFirestore mFirestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        mFirestore = FirebaseFirestore.getInstance();
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
@@ -64,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                 String mEmail=email.getText().toString().trim();
                 String mPassword=password.getText().toString().trim();
                 if (!mEmail.isEmpty()&& !mPassword.isEmpty() ){
-                    Login(mEmail,mPassword);
+                    LoginFirebase(mEmail,mPassword);
                 }else {
                     email.setError("Diperlukan");
                     password.setError("Diperlukan");
@@ -207,5 +227,40 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private void LoginFirebase(final String email, final String password) {
+        loading.setVisibility(View.VISIBLE);
+        btn_login.setVisibility(View.GONE);
+
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()){
+                            String token_id= FirebaseInstanceId.getInstance().getToken();
+                            String current_id=mAuth.getCurrentUser().getUid();
+
+                            Map<String,Object> userMap= new HashMap<>();
+                            userMap.put("token_id",token_id);
+                            mFirestore.collection("Users").document(current_id).update(userMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    sendToMain();
+                                }
+                            });
+
+                }
+            }
+        });
+
+
+    }
+
+    private void sendToMain(){
+        loading.setVisibility(View.GONE);
+        Intent i=new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(i);
+        finish();
     }
 }

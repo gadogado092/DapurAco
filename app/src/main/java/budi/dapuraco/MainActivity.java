@@ -25,11 +25,17 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,12 +44,37 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private TextView nama;
     private static String URL_READ=konfigurasi.URL+"dapuraco/read_detail.php";
-    String getId;
+    private String mUserId;
     SessionManager sessionManager;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore mFirestore;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        FirebaseUser currentUser= mAuth.getCurrentUser();
+
+        if (currentUser == null){
+            sendToLogin();
+        }else {
+            mUserId= currentUser.getUid();
+        }
+    }
+
+    private void sendToLogin(){
+        Intent i=new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(i);
+        finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mAuth=FirebaseAuth.getInstance();
+        mFirestore = FirebaseFirestore.getInstance();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -73,24 +104,37 @@ public class MainActivity extends AppCompatActivity
 
 
         //session login
-        sessionManager=new SessionManager(this);
-        sessionManager.checklogin();
-        HashMap<String,String> user=sessionManager.getUserDetail();
-        getId=user.get(sessionManager.ID);
+        //sessionManager=new SessionManager(this);
+        //sessionManager.checklogin();
+        //HashMap<String,String> user=sessionManager.getUserDetail();
+        //getId=user.get(sessionManager.ID);
 
         //navUsername.setText("Selamat Datang Kembali "+user.get(sessionManager.NAMA));
-        editprofile.setText("Edit Profile");
+        editprofile.setText("Log Out");
 
         editprofile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
+                Map<String,Object> tokenRemoveMap= new HashMap<>();
+                tokenRemoveMap.put("token_id", FieldValue.delete());
+                mFirestore.collection("Users").document(mUserId).update(tokenRemoveMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        mAuth.signOut();
+                        sendToLogin();
+                    }
+                });
+
+                sendToLogin();
                 //sessionManager.logout();
-                startActivity(new Intent(MainActivity.this,EditUserActivity.class));
+                //startActivity(new Intent(MainActivity.this,EditUserActivity.class));
             }
         });
 
 
-        beranda fragment = new beranda();
+        UserFragment fragment = new UserFragment();
         android.support.v4.app.FragmentTransaction fragmentTransaction =
                 getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragment);

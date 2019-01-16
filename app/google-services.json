@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "374805491701",
+    "firebase_url": "https://dapuraco.firebaseio.com",
+    "project_id": "dapuraco",
+    "storage_bucket": "dapuraco.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374805491701:android:9a129a2104106606",
+        "android_client_info": {
+          "package_name": "budi.dapuraco"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "374805491701-dmpc9bqsktcqvicojiqpls00lneg39mk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "budi.dapuraco",
+            "certificate_hash": "f4bb74288bd2698217c2926ea74ccd20a8968239"
+          }
+        },
+        {
+          "client_id": "374805491701-32b295m83714oomtl7vou87nbjcbf4u2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZwXK6CX2zLPyDvhwI1H_femziYREE6x0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "374805491701-32b295m83714oomtl7vou87nbjcbf4u2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
